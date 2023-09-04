@@ -18,7 +18,19 @@ Available in this repository:
 
 ## Qualitative Analysis
 
-![Alt text](pipeline.png?raw=true "The proposed apparent personality prediction model")
+![original treatment, male pronouns](FIG/orig_he.png?classes=caption "original treatment, male pronouns")
+*1. original treatment, male pronouns*
+![neutralized treatment, male pronouns](FIG/neutr_he.png?raw=true "neutralized treatment, male pronouns")
+*2. neutralized treatment, male pronouns*
+![augmented treatment, male pronouns](FIG/aug_he.png?raw=true "augmented treatment, male pronouns")
+*3. augmented treatment, male pronouns*
+![original treatment, female pronouns](FIG/orig_she.png?raw=true "original treatment, female pronouns")
+*4. original treatment, female pronouns*
+![neutralized treatment, female pronouns](FIG/neutr_she.png?raw=true "neutralized treatment, female pronouns")
+*5. neutralized treatment, female pronouns*
+![augmented treatment, female pronouns](FIG/aug_she.png?raw=true "augmented treatment, female pronouns")
+*6. augmented treatment, female pronouns*
+
 
 
 ## TODO
