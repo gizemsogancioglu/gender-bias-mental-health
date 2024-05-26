@@ -1,4 +1,8 @@
 # The effects of gender bias in word embeddings on patient phenotyping in the mental health domain
+[![Size](https://img.shields.io/github/repo-size/gizemsogancioglu/gender-bias-mental-health)](https://img.shields.io/github/repo-size/gizemsogancioglu/gender-bias-mental-health)
+[![License](https://img.shields.io/github/license/gizemsogancioglu/gender-bias-mental-health)](https://img.shields.io/github/license/gizemsogancioglu/gender-bias-mental-health)
+![GitHub top language](https://img.shields.io/github/languages/top/gizemsogancioglu/gender-bias-mental-health)
+
 Here, we provide source code for the following paper: [The effects of gender bias in word embeddings on
 patient phenotyping in the mental health domain, Gizem Sogancioglu, Heysem Kaya, Albert Ali Salah]
 
