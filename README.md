@@ -42,4 +42,4 @@ Available in this repository:
 
 ## References
 * Paper: [The effects of gender bias in word embeddings on patient phenotyping in the mental health domain, Gizem Sogancioglu, Heysem Kaya, Albert Ali Salah]
-* For more information or any problems, please contact: g.sogancioglu@uu.nl
+* For more information or any problems, please contact: gizemsogancioglu@gmail.com
