@@ -1,3 +1,5 @@
+import collections
+
 from sklearn.metrics import f1_score
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -6,6 +8,8 @@ from bias_mitigation import post_processing, get_gender_based_predictions, get_g
 from data_prep import convert_dataset, create_fold_i, fold_cv
 from embeddings import set_length
 from proxymute import proxyMute
+from eval import save_res
+
 
 def experiment(method_name, folds, config, embedding, clf):
 	label_encoder = LabelEncoder()
@@ -80,7 +84,30 @@ def experiment(method_name, folds, config, embedding, clf):
 
     
     #return
-
+    
+def evalute_predictions(method):
+	scores_arr = collections.defaultdict(list)
+	val_scores_arr = collections.defaultdict(list)
+	for fold_i in range(config):
+		test_preds = pd.read_csv(
+					"../preds/predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method,
+					                                                                   fold_i=fold_i,
+					                                                                   emb=embedding, measure=measure))
+		val_preds = pd.read_csv(
+					"../preds/val_predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method,
+					                                                                       fold_i=fold_i,
+					                                                                       emb=embedding,
+					                                                                       measure=measure))
+				
+		scores_arr = eval(test_preds, scores_arr, int(len(test_preds) / 2), clf, embedding, fold_i, dataset)
+		val_scores_arr = eval(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i,
+				                      dataset)
+		
+	pd.DataFrame(val_scores_arr).to_csv(
+			"../results/{measure}/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+	pd.DataFrame(scores_arr).to_csv(
+			"../results/{measure}/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+	
 
 if __name__ == "__main__":
 	print("*********** Bias analysis EXPERIMENTS ********")
@@ -116,3 +143,5 @@ if __name__ == "__main__":
 					print(f"method {method} will be evaluated using {data_key}.")
 					folds = create_fold_i(embedding, data_key, clf, folds_index)
 					experiment(method, folds, config, embedding, clf)
+					evalute_predictions(method)
+				save_res(method, measure, dataset)
