@@ -6,7 +6,7 @@
 Here, we provide source code for the following paper: [Sogancioglu, Gizem, Pablo Mosteiro, Albert Ali Salah, Floortje Scheepers, Heysem Kaya. "Fairness in AI-Based Mental Health: Clinician Perspectives and Bias Mitigation." Proceedings of the 2024 AAAI/ACM Conference on AI, Ethics, and Society. 2024.]
 
 Available in this repository: 
-- Extracted word embeddings from the MIMIC-III dataset (features/feature_[train/test].csv)  
+- Extracted word embeddings from the MIMIC-III dataset (features/*.csv)  
 - Scripts for experiments (source/study2/*.py)
   
         .
