@@ -5,7 +5,7 @@ import collections
 import scipy.stats as stats
 import warnings
 warnings.filterwarnings('ignore')
-from eval import save_res
+from eval import save_res, evaluate
 
 def compare_df_values_multi(df_list, df_names, column_name, embedding, fold):
     values = [df[df['embedding'] == embedding].mean()[column_name] for df in df_list]
@@ -15,10 +15,10 @@ def compare_df_values_multi(df_list, df_names, column_name, embedding, fold):
 
     __, p_value = ttest_rel(df_list[0][column_name], df_list[max_index][column_name])
     if p_value > 0.05:
-        print("not significant")
+        #print("not significant")
         return "orig"
     else:
-        print("significant")
+        #print("significant")
         return df_names[max_index]
 
     return  df_names[max_index]
@@ -30,9 +30,7 @@ def participatory_method(config, dataset, measure):
         df_list = []
         for method in method_arr:
             data = pd.read_csv(f'../results/val_experiments_{dataset}_{method}.csv')
-            #data = data[data['embedding'] == embedding].mean()
             df_list.append(data)
-        # df_list.append(data[(data['embedding'] == embedding) & (data['fold_num'] == fold)])
         for fold in range(config):
             preds = pd.read_csv(
                 f"../preds/predictions_{dataset}_orig_fold{fold}_{embedding}.csv")
@@ -40,14 +38,14 @@ def participatory_method(config, dataset, measure):
             predictions_prob = pd.Series(index=preds.index, dtype='float64')
 
             for gender in ['F', 'M']:
+                print(embedding)
                 best_model = compare_df_values_multi(df_list, method_arr, measure + '-' + gender, embedding, fold)
                 if fold == 0: 
                     print("best model {best} for {emb} and {gender} for fold {fold}".format(best=best_model, emb=embedding,
                                                                                         gender=gender, fold=fold))
 
                 best_preds = pd.read_csv(
-                    "../preds/{dataset}/{measure}/predictions_{dataset}_{best}_fold{num}_{emb}.csv".format(dataset=dataset, clf=clf, best=best_model,
-                                                                                            num=fold, measure=measure.lower(), emb=embedding))
+                    f"../preds/predictions_{dataset}_{best_model}_fold{fold}_{embedding}.csv")
                 
                 if dataset == 'UMC': 
                     gender = 0 if gender == 'F' else 1
@@ -65,8 +63,7 @@ def participatory_method(config, dataset, measure):
                               best_preds[[clf, 'GENDER']].reset_index(drop=True)], axis=1)
 
             data.to_csv(
-                "../preds/predictions_{dataset}_{best}_fold{num}_{emb}.csv".format(dataset=dataset, clf=clf, best='participatory',
-                                                                                        num=fold, emb=embedding, measure=measure.lower()))
+                f"../preds/predictions_{dataset}_participatory_fold{fold}_{embedding}.csv")
 if __name__ == "__main__":
     dataset = 'MIMIC'
     #dataset = 'UMC'
@@ -74,11 +71,11 @@ if __name__ == "__main__":
     attr = 'GENDER'
 
     if dataset == 'MIMIC':
-        config = 10
+        config = 5
         clf = 'DEPRESSION_majority'
         label  = 'DEPRESSION_majority'
         #embeddings = ['w2vec_news', 'biowordvec', 'bert', 'clinical_bert']
-        embeddings = ['w2vec_news']
+        embeddings = ['biowordvec']
         measure = 'F1'
 
     else: 
@@ -104,8 +101,8 @@ if __name__ == "__main__":
                 val_preds =  pd.read_csv(
                     f"../preds/predictions_{dataset}_{method}_fold{fold_i}_{embedding}.csv")
 
-                scores_arr = eval(test_preds, scores_arr, int(len(test_preds)/2) , clf, embedding, fold_i, dataset)
-                val_scores_arr = eval(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i, dataset)
+                scores_arr = evaluate(test_preds, scores_arr, int(len(test_preds)/2) , clf, embedding, fold_i, dataset)
+                val_scores_arr = evaluate(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i, dataset)
 
         pd.DataFrame(val_scores_arr).to_csv(f"../results/val_experiments_{dataset}_{method}.csv")
 
