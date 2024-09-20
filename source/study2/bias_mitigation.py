@@ -15,8 +15,8 @@ svm_params = [{
 	'clf__kernel': ['linear']
 }]
 label_encoder = LabelEncoder()
-attr = 'Gender'
-clf = 'Depression_majority'
+attr = 'GENDER'
+clf = 'DEPRESSION_majority'
 
 
 def classifier(X_train, X_val, y_train, y_val, weights, clf='DEPRESSION_majority'):

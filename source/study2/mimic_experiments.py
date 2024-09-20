@@ -49,11 +49,11 @@ def experiment(method_name, folds, config, embedding, clf):
 		elif method_name in ['postprocessing', 'inprocessing']:
 			if method == 'postprocessing':
 				val_data = pd.read_csv(
-					"../../preds/MIMIC/val_predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
+					"../preds/val_predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
 					                                                                                    fold_i=fold_i,
 					                                                                                    emb=embedding))
 				test_data = pd.read_csv(
-					"../../preds/MIMIC/predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
+					"../preds/predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
 					                                                                                fold_i=fold_i,
 					                                                                                emb=embedding))
 			else:
@@ -73,9 +73,9 @@ def experiment(method_name, folds, config, embedding, clf):
 			data = pd.DataFrame()
 			val_data = pd.DataFrame()
 		
-		data.to_csv(f"../../preds/MIMIC/predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
+		data.to_csv(f"../preds/predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
 		
-		val_data.to_csv(f"../../preds/MIMIC/val_predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
+		val_data.to_csv(f"../preds/val_predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
 
 
     

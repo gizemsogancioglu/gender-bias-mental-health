@@ -108,9 +108,9 @@ def measure_ratio(val1, val2):
 from scipy.stats import ttest_rel
 def save_res(method, measure_file, dataset):
     for split in ['val_', '']:
-        data = pd.read_csv(f"../results/{dataset}/{measure_file}/{split}experiments_{dataset}_{method}.csv")
+        data = pd.read_csv(f"../results/{split}experiments_{dataset}_{method}.csv")
         data = data.groupby(['embedding', 'fold_num']).tail(1)
-        orig_data = pd.read_csv(f"../results/{dataset}/{measure_file}/{split}experiments_{dataset}_orig.csv")
+        orig_data = pd.read_csv(f"../results/{split}experiments_{dataset}_orig.csv")
         columns = ['TPR-F', 'TPR-M',
                        'AUC-F', 'AUC-M',
                        'AUC-fm', 'AUC-mf',
@@ -171,7 +171,7 @@ def save_res(method, measure_file, dataset):
         
         final_columns = [ 'mismatch_ratio','avg_TPRR', 'avg_FPRR', 'avg_F1R','avg_F1-posR', 'avg_F1-negR', 'TPRR', 'FPRR', 'F1R','TPR-F', 'TPR-M', 'FPR-F', 'FPR-M', 'F1-F', 'F1-M', 'F1-posR', 'F1-negR', 'AUCR', 'AUCminmax', 'F1', 'AUC']
     
-        subset[final_columns].to_csv("../results/{dataset}/{measure}/{split}experiments_{dataset}_{i}_summary.csv".format(dataset=dataset, measure=measure_file, i=method, split=split))
+        subset[final_columns].to_csv("../results/{split}experiments_{dataset}_{i}_summary.csv".format(dataset=dataset, measure=measure_file, i=method, split=split))
 
     return
 
@@ -204,19 +204,19 @@ if __name__ == "__main__":
         for embedding in embeddings:
             for fold_i in range(config):
                 test_preds =  pd.read_csv(
-                        "../preds/{dataset}/{measure}/predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method, fold_i=fold_i,
+                        "../preds/predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method, fold_i=fold_i,
                                                                                          emb=embedding, measure=measure))
 
                 val_preds = pd.read_csv(
-                    "../preds/{dataset}/{measure}/val_predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method, fold_i=fold_i,
+                    "../preds/val_predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method, fold_i=fold_i,
                                                                                  emb=embedding, measure=measure))
                 #print(test_preds)
             
                 scores_arr = eval(test_preds, scores_arr, int(len(test_preds)/2), clf, embedding, fold_i, dataset)
                 val_scores_arr = eval(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i, dataset)
 
-        pd.DataFrame(val_scores_arr).to_csv("../results/{dataset}/{measure}/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
-        pd.DataFrame(scores_arr).to_csv("../results/{dataset}/{measure}/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+        pd.DataFrame(val_scores_arr).to_csv("../results/{measure}/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+        pd.DataFrame(scores_arr).to_csv("../results/{measure}/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
 
 
     for method in method_arr:

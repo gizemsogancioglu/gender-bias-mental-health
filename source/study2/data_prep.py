@@ -21,12 +21,12 @@ def create_MIMIC(data):
 def create_fold_i(name, type, clf, fold_i):
 	neg_class = 'None-mental'
 	folds = collections.defaultdict(list)
-	orig_data = pd.read_csv("../data/mimic_{name}_orig.csv".format(name=name))
-	swapped_data = pd.read_csv("../data/mimic_{name}_swapped.csv".format(name=name))
-	neutr_data = pd.read_csv("../data/mimic_{name}_neutr.csv".format(name=name))
+	orig_data = pd.read_csv("../features/mimic_{name}_orig.csv".format(name=name))
+	swapped_data = pd.read_csv("../features/mimic_{name}_swapped.csv".format(name=name))
+	neutr_data = pd.read_csv("../features/mimic_{name}_neutr.csv".format(name=name))
 	
 	if type != "augmented":
-		data = pd.read_csv("../data/mimic_{name}_{type}.csv".format(name=name, type=type))
+		data = pd.read_csv("../features/mimic_{name}_{type}.csv".format(name=name, type=type))
 		subset = data[(data[clf] == 1) | (data[neg_class] == 1)].reset_index(drop=True)
 	
 	subset_orig = orig_data[(orig_data[clf] == 1) | (orig_data[neg_class] == 1)].reset_index(drop=True)
