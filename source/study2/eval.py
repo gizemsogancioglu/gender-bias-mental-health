@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import stats
 from sklearn.metrics import confusion_matrix, f1_score, roc_auc_score
 
-def eval(data, scores_arr, i, clf, embedding, fold_i, dataset):
+def evaluate(data, scores_arr, i, clf, embedding, fold_i, dataset):
     scores_arr = compute_mismatch(data, i, scores_arr, dataset)
     scores_arr = compute_predictive_parity(data, scores_arr, i, clf, dataset)
     scores_arr['total_num'].append(i)
@@ -176,48 +176,6 @@ def save_res(method, measure_file, dataset):
     return
 
 
-#method_arr = ['orig', 'neutr', 'augmented', 'preprocessing', 'gender_specific', 'postprocessing']
-method_arr = ['orig', 'neutr', 'augmented']
-attr = 'GENDER'
-dataset = 'MIMIC'
-#dataset = 'UMC'
 gender_dict = {"UMC": [0, 1], "MIMIC": ['F', 'M']}
+attr = 'GENDER'
 #MIMIC: F, M
-if __name__ == "__main__":
-    measure = 'f1'
-    if dataset == 'MIMIC':
-        clf = 'DEPRESSION_majority'
-        #embeddings = ['w2vec_news', 'biowordvec', 'bert', 'clinical_bert']
-        embeddings = [ 'w2vec_news', 'biowordvec']
-        config = 10
-    else:
-        clf = 'outcome'
-        embeddings = ['w2vec', 'biow2vec', 'bert', 'clinical_bert']
-        #embeddings = ['biow2vec']
-        config = 20
-
-    print("*********** Bias analysis EXPERIMENTS ********")
-    for method in method_arr:
-        scores_arr = collections.defaultdict(list)
-        val_scores_arr = collections.defaultdict(list)
-        method_name = method
-        for embedding in embeddings:
-            for fold_i in range(config):
-                test_preds =  pd.read_csv(
-                        "../preds/predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method, fold_i=fold_i,
-                                                                                         emb=embedding, measure=measure))
-
-                val_preds = pd.read_csv(
-                    "../preds/val_predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method, fold_i=fold_i,
-                                                                                 emb=embedding, measure=measure))
-                #print(test_preds)
-            
-                scores_arr = eval(test_preds, scores_arr, int(len(test_preds)/2), clf, embedding, fold_i, dataset)
-                val_scores_arr = eval(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i, dataset)
-
-        pd.DataFrame(val_scores_arr).to_csv("../results/{measure}/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
-        pd.DataFrame(scores_arr).to_csv("../results/{measure}/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
-
-
-    for method in method_arr:
-        save_res(method, measure, dataset)

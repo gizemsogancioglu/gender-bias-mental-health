@@ -8,7 +8,7 @@ from bias_mitigation import post_processing, get_gender_based_predictions, get_g
 from data_prep import convert_dataset, create_fold_i, fold_cv
 from embeddings import set_length
 from proxymute import proxyMute
-from eval import save_res
+from eval import save_res, evaluate
 
 
 def experiment(method_name, folds, config, embedding, clf):
@@ -99,14 +99,14 @@ def evalute_predictions(method):
 					                                                                       emb=embedding,
 					                                                                       measure=measure))
 				
-		scores_arr = eval(test_preds, scores_arr, int(len(test_preds) / 2), clf, embedding, fold_i, dataset)
-		val_scores_arr = eval(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i,
+		scores_arr = evaluate(test_preds, scores_arr, int(len(test_preds) / 2), clf, embedding, fold_i, dataset)
+		val_scores_arr = evaluate(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i,
 				                      dataset)
 		
 	pd.DataFrame(val_scores_arr).to_csv(
-			"../results/{measure}/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+			"../results/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
 	pd.DataFrame(scores_arr).to_csv(
-			"../results/{measure}/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+			"../results/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
 	
 
 if __name__ == "__main__":
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 	attr = 'GENDER'
 	mental_arr = ['DEPRESSION_majority']
 	# embeddings = ['w2vec_news', 'biowordvec', 'bert', 'clinical_bert']
-	embeddings = ['w2vec_news']
+	embeddings = ['biowordvec']
 	
 	data = pd.read_csv("../data/mimic_orig.csv", index_col=None)
 	# create_MIMIC(data)
@@ -129,13 +129,13 @@ if __name__ == "__main__":
 	
 	measure = 'f1'
 	# config = 50
-	config = 10
+	config = 5
 	folds_index = fold_cv(config=config)
 	print(len(folds_index['DEPRESSION_majority']['0'][0]))
 	print(len(folds_index['DEPRESSION_majority']['0'][1]))
 	print(len(folds_index['DEPRESSION_majority']['0'][2]))
-	# methods = {'orig': ['orig', 'postprocessing', 'gender_specific', 'preprocessing'], 'neutr': ['neutr'], 'augmented': ['augmented']}
-	methods = {'orig': ['orig']}
+	methods = {'orig': ['orig', 'postprocessing', 'gender_specific', 'preprocessing'], 'neutr': ['neutr'], 'augmented': ['augmented']}
+	#methods = {'orig': ['orig']}
 	for clf in mental_arr:
 		for data_key, values in methods.items():
 			for method in values:
