@@ -7,14 +7,14 @@ Here, we provide source code for the following paper: [Sogancioglu, Gizem, Pablo
 
 Available in this repository: 
 - Extracted word embeddings from the MIMIC-III dataset (features/feature_[train/test].csv)  
-- Scripts for experiments (source/*.py)
+- Scripts for experiments (source/study2/*.py)
   
         .
-        ├── source                          # including source files (feature extractor, training, and bias mitigation scripts)                
+        ├── study2                          # including source files (feature extractor, training, and bias mitigation scripts)                
         │   ├── mimic_experiments.py        # main script to run experiments with different bias mitigation methods (gender-specific models, data augmentation/neutralization, pre/post-processing)
         │   ├── participatory.py            # gain-based model selection experiments.
         │   ├── *.py                        # other source files include helper functions for data preparation, preprocessing, embedding extraction, and bias mitigation. 
-        └── features                        # extracted w2vec/biowordvec/bert/clinical_bert features. 
+        └── features                        # extracted w2vec/biowordvec/bert/clinical_bert features (mimic_{embedding}_[orig/neutr/swapped].csv). 
 
 
 ## References
