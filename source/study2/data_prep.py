@@ -1,4 +1,13 @@
+import collections
+import pandas as pd
+import numpy as np
+from aif360.datasets import BinaryLabelDataset
+from sklearn.model_selection import StratifiedKFold
 
+from text_processing import gender_swapping, swap_gender
+
+clf = 'DEPRESSION_majority'
+attr = 'GENDER'
 
 def create_MIMIC(data):
 	for val, str_ in [[True, 'neutr'], [False, 'swapped']]:
@@ -12,12 +21,12 @@ def create_MIMIC(data):
 def create_fold_i(name, type, clf, fold_i):
 	neg_class = 'None-mental'
 	folds = collections.defaultdict(list)
-	orig_data = pd.read_csv("../mimic_{name}_orig.csv".format(name=name))
-	swapped_data = pd.read_csv("../mimic_{name}_swapped.csv".format(name=name))
-	neutr_data = pd.read_csv("../mimic_{name}_neutr.csv".format(name=name))
+	orig_data = pd.read_csv("../data/mimic_{name}_orig.csv".format(name=name))
+	swapped_data = pd.read_csv("../data/mimic_{name}_swapped.csv".format(name=name))
+	neutr_data = pd.read_csv("../data/mimic_{name}_neutr.csv".format(name=name))
 	
 	if type != "augmented":
-		data = pd.read_csv("../mimic_{name}_{type}.csv".format(name=name, type=type))
+		data = pd.read_csv("../data/mimic_{name}_{type}.csv".format(name=name, type=type))
 		subset = data[(data[clf] == 1) | (data[neg_class] == 1)].reset_index(drop=True)
 	
 	subset_orig = orig_data[(orig_data[clf] == 1) | (orig_data[neg_class] == 1)].reset_index(drop=True)
@@ -70,12 +79,12 @@ def convert_dataset(train_data, clf):
 def fold_cv(validation_split=0.1, config=10):
 	folds = collections.defaultdict(list)
 	
-	data = pd.read_csv("../mimic_orig.csv")
+	data = pd.read_csv("../data/mimic_orig.csv")
 	
 	neg_class = 'None-mental'
 	n_splits = 10
 	
-	for clf in mental_arr:
+	for clf in ['DEPRESSION_majority']:
 		i = 0
 		folds[clf] = collections.defaultdict(list)
 		subset = data[(data[clf] == 1) | (data[neg_class] == 1)].reset_index(drop=True)

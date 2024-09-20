@@ -5,10 +5,11 @@ import numpy as np
 import pandas as pd
 from scipy.stats import pearsonr
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.svm import SVC
+from sklearn.metrics import f1_score
 
-from source.study2.bias_mitigation import get_predictions
+from bias_mitigation import get_predictions
 
 # Encode labels
 label_encoder = LabelEncoder()

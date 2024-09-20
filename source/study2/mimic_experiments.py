@@ -1,20 +1,21 @@
 from sklearn.metrics import f1_score
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-from source.study2.bias_mitigation import post_processing, get_gender_based_predictions, get_gender_based_classifier, \
+from bias_mitigation import post_processing, get_gender_based_predictions, get_gender_based_classifier, \
 	pre_processing, classifier, get_predictions
-from source.study2.data_prep import convert_dataset, create_fold_i, fold_cv
-from source.study2.embeddings import set_length
-from source.study2.proxymute import proxyMute
+from data_prep import convert_dataset, create_fold_i, fold_cv
+from embeddings import set_length
+from proxymute import proxyMute
 
 def experiment(method_name, folds, config, embedding, clf):
 	label_encoder = LabelEncoder()
-	for fold_i in range(10, config):
+	for fold_i in range(0, config):
 		X, y = [features[[str(a) for a in range(embedding_length[embedding])]].values for features in
 		        folds[str(fold_i)]], [y[[clf, 'GENDER', 'TEXT']] for y in folds[str(fold_i)]]
 		column_names = [str(a) for a in range(embedding_length[embedding])] + ['GENDER', clf]
 		train_data = folds[str(fold_i)][0][column_names]
 		aif360_train = convert_dataset(train_data, clf)
+        label_encoder.fit(y[0][clf])
 		if method_name == 'preprocessing':
 			reweighed_train, labels, weights = pre_processing(aif360_train)
 		else:
@@ -48,11 +49,11 @@ def experiment(method_name, folds, config, embedding, clf):
 		elif method_name in ['postprocessing', 'inprocessing']:
 			if method == 'postprocessing':
 				val_data = pd.read_csv(
-					"../preds/MIMIC/{measure}/val_predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
+					"../../preds/MIMIC/val_predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
 					                                                                                    fold_i=fold_i,
 					                                                                                    emb=embedding))
 				test_data = pd.read_csv(
-					"../preds/MIMIC/{measure}/predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
+					"../../preds/MIMIC/predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
 					                                                                                fold_i=fold_i,
 					                                                                                emb=embedding))
 			else:
@@ -72,17 +73,13 @@ def experiment(method_name, folds, config, embedding, clf):
 			data = pd.DataFrame()
 			val_data = pd.DataFrame()
 		
-		data.to_csv("../preds/MIMIC/{measure}/predictions_MIMIC_{i}_fold{fold_i}_{emb}.csv".format(i=method_name,
-		                                                                                           measure=measure,
-		                                                                                           fold_i=fold_i,
-		                                                                                           emb=embedding))
+		data.to_csv(f"../../preds/MIMIC/predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
 		
-		val_data.to_csv(
-			"../preds/MIMIC/{measure}/val_predictions_MIMIC_{i}_fold{fold_i}_{emb}.csv".format(i=method_name,
-			                                                                                   measure=measure,
-			                                                                                   fold_i=fold_i,
-			                                                                                   emb=embedding))
-	return
+		val_data.to_csv(f"../../preds/MIMIC/val_predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
+
+
+    
+    #return
 
 
 if __name__ == "__main__":
@@ -93,10 +90,12 @@ if __name__ == "__main__":
 	# embeddings = ['w2vec_news', 'biowordvec', 'bert', 'clinical_bert']
 	embeddings = ['w2vec_news']
 	
-	data = pd.read_csv("../mimic_orig.csv", index_col=None)
+	data = pd.read_csv("../data/mimic_orig.csv", index_col=None)
 	# create_MIMIC(data)
 	# for type in ['neutr']:
 	# extract_all_feat(type)
+
+    ###### WE ASSUME THAT FEATURES ARE ALREADY EXTRACTED #####################
 	embedding_length = set_length()
 	dataset = 'MIMIC'
 	label = clf
