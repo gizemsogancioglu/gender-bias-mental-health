@@ -7,7 +7,7 @@ from collections import defaultdict
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from source.embeddings import get_word_vector, bert_tokenizer, bert_model, clinical_model, clinical_tokenizer
+from source.study2.embeddings import get_word_vector, bert_tokenizer, bert_model, clinical_model, clinical_tokenizer
 
 synonym_dict = {}
 
@@ -25,7 +25,7 @@ gender_sentences = ['he is a father of a girl and boy and he loves his children'
                     'he is a good son']
 
 def read_disease_file():
-    f = open('../data/depression_synonyms.json', encoding='utf-8')
+    f = open('../../data/depression_synonyms.json', encoding='utf-8')
     synonym_dict = json.load(f)
     return synonym_dict
 
@@ -89,13 +89,10 @@ def identify_gender_space(model, model_name):
     sns.barplot(data=df, x="components", y="explained variance")
     plt.ylim(0, 0.7)
     plt.savefig("../output/{model_name}_gender_space.png".format(model_name=model_name), bbox_inches='tight', pad_inches=0)
-
     return pca.components_[0]
-
 
 def cosine_similarity(vec1, vec2):
     return (1 - spatial.distance.cosine(vec1, vec2))
-
 
 def plot_direct_bias(plot_name):
     df = pd.read_csv("../output/" + plot_name + "_direct_bias_cat.csv", index_col=None)
