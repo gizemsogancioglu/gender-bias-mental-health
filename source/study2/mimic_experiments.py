@@ -15,7 +15,7 @@ def experiment(method_name, folds, config, embedding, clf):
 		column_names = [str(a) for a in range(embedding_length[embedding])] + ['GENDER', clf]
 		train_data = folds[str(fold_i)][0][column_names]
 		aif360_train = convert_dataset(train_data, clf)
-        label_encoder.fit(y[0][clf])
+		label_encoder.fit(y[0][clf])
 		if method_name == 'preprocessing':
 			reweighed_train, labels, weights = pre_processing(aif360_train)
 		else:
