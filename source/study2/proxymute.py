@@ -14,7 +14,7 @@ from sklearn.metrics import f1_score, make_scorer
 from bias_mitigation import get_predictions, classifier
 from data_prep import fold_cv, create_fold_i
 from embeddings import set_length
-from eval import measure_ratio
+from eval import measure_ratio, evaluate
 from sklearn.inspection import permutation_importance
 
 # Encode labels
@@ -104,7 +104,12 @@ def nullfy_given_indices(df, test_df, index_arr, strategy='mean'):
 
 
 def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method='mute'):
-	clf = 'DEPRESSION_majority'
+    
+    if os.path.isfile(f"../results/iterative_{method}_{del_}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i))):
+        print("Iterative analysis already exists...")
+        return
+    
+    clf = 'DEPRESSION_majority'
 	filename = str(fold_i)
 	df_expl = pd.read_csv(f"../explanations/{expl}_{filename}_{embedding}.csv")
 	df_expl['feat'] = X_test.columns
@@ -132,7 +137,7 @@ def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method=
 				model = pipeline.fit(train_data, pd.DataFrame(y[0]).reset_index(drop=True)[clf])
 			
 			test_preds = get_predictions(model, test_data, y_test)
-			scores_arr = eval(test_preds, scores_arr, int(len(test_preds) / 2), clf, embedding, fold_i, dataset)
+			scores_arr = evaluate(test_preds, scores_arr, int(len(test_preds) / 2), clf, embedding, fold_i, dataset)
 			for score in scores_arr.keys():
 				arr_sub[score].append(scores_arr[score][0])
 		
@@ -144,12 +149,12 @@ def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method=
 	return
 
 
-def ours_(fold, embedding, method, expl):
+def model_selection(fold, embedding, method, expl):
 	# choose the model that gives the lowest score for lambda * mae on validation set.
 	df = collections.defaultdict(list)
 	for split in ['val', 'test']:
 		df[split] = pd.read_csv(
-			f"../results/iterative_analysis_{method}_{expl}_{embedding}_{split}_{fold}.csv")
+			f"../results/iterative_{method}_{expl}_{embedding}_{split}_{fold}.csv")
 		df[split]['ID'] = df[split].index
 	func_methods = ['FUNC_' + str(lambda_val) for lambda_val in [0, 0.25, 0.5, 0.75, 1]]
 	dict_m = collections.defaultdict(list)
@@ -223,40 +228,22 @@ def get_explanations(X, y, fold_i, expl='shap'):
 		create_random(X[3], filename)
 
 
-def proxyRoar(X, y, fold_i, expl):
-	method = 'roar'
-	get_explanations(X, y, fold_i, expl)
+def ours(X, y, fold_i, expl, method):
+    ####### Step1: get explanations using the given explanation method (expl)############################
+    get_explanations(X, y, fold_i, expl)
 	
 	model = classifier(pd.DataFrame(X[0]).reset_index(drop=True),
 	                   pd.DataFrame(X[3]).reset_index(drop=True),
 	                   pd.DataFrame(y[0]).reset_index(drop=True),
 	                   pd.DataFrame(y[3]).reset_index(drop=True), weights=None, clf='DEPRESSION_majority')
 	
+    ####### Step 2: mute the features cumulatively and compute fairness and performance in each step. ###
 	for test_data, test_y, split in [pd.DataFrame(X[4]).reset_index(drop=True), y[4], 'val'], [
 		pd.DataFrame(X[1]).reset_index(drop=True), y[1], 'test']:
-		iterative_analysis(fold_i, model, X, test_data, test_y, split, y, 'roar')
+		iterative_analysis(fold_i, model, X, test_data, test_y, split, expl, y, method)
 	
-	ours_(fold_i, embedding, expl, expl)
-	
-	return
-
-
-def proxyMute(X, y, fold_i, expl):
-	method = 'mute'
-	get_explanations(X, y, fold_i, expl)
-	
-	model = classifier(pd.DataFrame(X[0]).reset_index(drop=True),
-	                   pd.DataFrame(X[3]).reset_index(drop=True),
-	                   pd.DataFrame(y[0]).reset_index(drop=True),
-	                   pd.DataFrame(y[3]).reset_index(drop=True), weights=None, clf='DEPRESSION_majority')
-	
-	for test_data, test_y, split in [pd.DataFrame(X[4]).reset_index(drop=True), y[4], 'val'], [
-		pd.DataFrame(X[1]).reset_index(drop=True), y[1], 'test']:
-		iterative_analysis(fold_i, model, X, test_data, test_y, split, expl, y, 'mute')
-	
-	# save_res('proxymute', 'f1', 'mimic')
-	
-	ours_(fold_i, embedding, method, expl)
+    ###### Step 3: select the model that gives optimum scores ###########################################
+	model_selection(fold_i, embedding, method, expl)
 	
 	return
 
@@ -268,8 +255,8 @@ if __name__ == "__main__":
 	mental_arr = ['DEPRESSION_majority']
 	# embeddings = ['w2vec_news', 'biowordvec']
 	embeddings = ['biowordvec']
-	data = pd.read_csv("../data/mimic_orig.csv", index_col=None)
-	
+	#data = pd.read_csv("../data/mimic_orig.csv", index_col=None)
+
 	###### WE ASSUME THAT FEATURES ARE ALREADY EXTRACTED #####################
 	embedding_length = set_length()
 	dataset = 'MIMIC'
@@ -284,9 +271,8 @@ if __name__ == "__main__":
 	for embedding in embeddings:
 		folds = create_fold_i(embedding, 'orig', clf, folds_index)
 		for fold_i in range(0, config):
-			X, y = [features[[str(a) for a in range(embedding_length[embedding])]].values for features in
-			        folds[str(fold_i)]], [y[[clf, 'GENDER', 'TEXT']] for y in folds[str(fold_i)]]
-			if method == 'mute':
-				proxyMute(X, y, fold_i, expl=explanation)
-			elif method == 'roar':
-				proxyRoar(X, y, fold_i, explanation)
+	
+            X, y = [features[[str(a) for a in range(embedding_length[embedding])]].values for features in
+			        folds[str(fold_i)]], [y[[clf, 'GENDER', 'TEXT']] for y in folds[str(fold_i)]]	
+			
+            ours(X, y, fold_i, expl=explanation)
