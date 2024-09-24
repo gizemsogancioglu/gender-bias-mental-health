@@ -5,10 +5,9 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from bias_mitigation import post_processing, get_gender_based_predictions, get_gender_based_classifier, \
 	pre_processing, classifier, get_predictions
-from data_prep import convert_dataset, create_fold_i, fold_cv
-from embeddings import set_length
-from proxymute import proxyMute
-from eval import save_res, evaluate
+from source.common.data_prep import convert_dataset, create_fold_i, fold_cv
+from source.common.embeddings import set_length
+from source.common.eval import save_res, evaluate
 
 
 def experiment(method_name, folds, config, embedding, clf):
@@ -68,11 +67,6 @@ def experiment(method_name, folds, config, embedding, clf):
 			if method == 'postprocessing':
 				val_data, data = post_processing(aif360_val, aif360_test, val_data, test_data)
 			
-		elif method_name == 'proxymute':
-			proxyMute(X, y, fold_i)
-			data = pd.DataFrame()
-			val_data = pd.DataFrame()
-		
 		else:
 			data = pd.DataFrame()
 			val_data = pd.DataFrame()
@@ -82,7 +76,6 @@ def experiment(method_name, folds, config, embedding, clf):
 		val_data.to_csv(f"../preds/val_predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
 
 
-    
     #return
     
 def evalute_predictions(method):

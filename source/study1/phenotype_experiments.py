@@ -13,8 +13,8 @@ import pandas as pd
 
 from sklearn.metrics import confusion_matrix
 
-from source.study2.embeddings import get_vector, get_word_vector, extract_w2vec
-from source.study2.text_processing import gender_swapping, clean
+from source.common.embeddings import get_vector, get_word_vector, extract_w2vec
+from source.common.text_processing import gender_swapping, clean
 
 svm_params = [{
     'clf__C': [0.01, 0.1, 1, 10, 100],

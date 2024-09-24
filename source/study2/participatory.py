@@ -1,11 +1,9 @@
 import pandas as pd
 from scipy.stats import ttest_rel
-import numpy as np
 import collections
-import scipy.stats as stats
 import warnings
 warnings.filterwarnings('ignore')
-from eval import save_res, evaluate
+from source.common.eval import save_res, evaluate
 
 def compare_df_values_multi(df_list, df_names, column_name, embedding, fold):
     values = [df[df['embedding'] == embedding].mean()[column_name] for df in df_list]

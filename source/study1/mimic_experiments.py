@@ -7,9 +7,9 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-from source.study2.text_processing import gender_swapping, swap_gender
+from source.common.text_processing import gender_swapping, swap_gender
 import numpy as np
-from sklearn.pipeline Pipeline
+from sklearn.pipeline import Pipeline
 import pandas as pd
 
 clinical_model_name = 'emilyalsentzer/Bio_ClinicalBERT'

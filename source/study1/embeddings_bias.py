@@ -7,7 +7,7 @@ from collections import defaultdict
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from source.study2.embeddings import get_word_vector, bert_tokenizer, bert_model, clinical_model, clinical_tokenizer
+from source.common.embeddings import get_word_vector, bert_tokenizer, bert_model, clinical_model, clinical_tokenizer
 
 synonym_dict = {}
 

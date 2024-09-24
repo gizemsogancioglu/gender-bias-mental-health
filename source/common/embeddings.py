@@ -3,7 +3,7 @@ import collections
 import gensim
 import gensim.downloader as api
 import numpy as np
-from source.study2.text_processing import clean
+from source.common.text_processing import clean
 from transformers import AutoTokenizer, AutoModel
 import pandas as pd
 

@@ -4,7 +4,6 @@ import os
 
 import numpy as np
 import pandas as pd
-# from interpret.blackbox import shap
 import shap
 from scipy.stats import pearsonr
 from sklearn.pipeline import Pipeline
@@ -12,9 +11,9 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, make_scorer
 from source.study2.bias_mitigation import get_predictions, classifier
-from source.study2.data_prep import fold_cv, create_fold_i
-from source.study2.embeddings import set_length
-from source.study2.eval import measure_ratio, evaluate
+from source.common.data_prep import fold_cv, create_fold_i
+from source.common.embeddings import set_length
+from source.common.eval import measure_ratio, evaluate
 from sklearn.inspection import permutation_importance
 
 # Encode labels
