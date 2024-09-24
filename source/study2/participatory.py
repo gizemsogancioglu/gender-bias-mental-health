@@ -27,11 +27,11 @@ def participatory_method(config, dataset, measure):
     for embedding in embeddings:
         df_list = []
         for method in method_arr:
-            data = pd.read_csv(f'../results/val_experiments_{dataset}_{method}.csv')
+            data = pd.read_csv(f'results/val_experiments_{dataset}_{method}.csv')
             df_list.append(data)
         for fold in range(config):
             preds = pd.read_csv(
-                f"../preds/predictions_{dataset}_orig_fold{fold}_{embedding}.csv")
+                f"preds/predictions_{dataset}_orig_fold{fold}_{embedding}.csv")
             predictions = pd.Series(index=preds.index, dtype='float64')
             predictions_prob = pd.Series(index=preds.index, dtype='float64')
 
@@ -43,7 +43,7 @@ def participatory_method(config, dataset, measure):
                                                                                         gender=gender, fold=fold))
 
                 best_preds = pd.read_csv(
-                    f"../preds/predictions_{dataset}_{best_model}_fold{fold}_{embedding}.csv")
+                    f"preds/predictions_{dataset}_{best_model}_fold{fold}_{embedding}.csv")
                 
                 if dataset == 'UMC': 
                     gender = 0 if gender == 'F' else 1
@@ -61,7 +61,7 @@ def participatory_method(config, dataset, measure):
                               best_preds[[clf, 'GENDER']].reset_index(drop=True)], axis=1)
 
             data.to_csv(
-                f"../preds/predictions_{dataset}_participatory_fold{fold}_{embedding}.csv")
+                f"preds/predictions_{dataset}_participatory_fold{fold}_{embedding}.csv")
 if __name__ == "__main__":
     dataset = 'MIMIC'
     #dataset = 'UMC'
@@ -94,17 +94,17 @@ if __name__ == "__main__":
         for embedding in embeddings:
             for fold_i in range(config):
                 test_preds =  pd.read_csv(
-                        f"../preds/predictions_{dataset}_{method}_fold{fold_i}_{embedding}.csv")
+                        f"preds/predictions_{dataset}_{method}_fold{fold_i}_{embedding}.csv")
 
                 val_preds =  pd.read_csv(
-                    f"../preds/predictions_{dataset}_{method}_fold{fold_i}_{embedding}.csv")
+                    f"preds/predictions_{dataset}_{method}_fold{fold_i}_{embedding}.csv")
 
                 scores_arr = evaluate(test_preds, scores_arr, int(len(test_preds)/2) , clf, embedding, fold_i, dataset)
                 val_scores_arr = evaluate(val_preds, val_scores_arr, int(len(val_preds) / 2), clf, embedding, fold_i, dataset)
 
-        pd.DataFrame(val_scores_arr).to_csv(f"../results/val_experiments_{dataset}_{method}.csv")
+        pd.DataFrame(val_scores_arr).to_csv(f"results/val_experiments_{dataset}_{method}.csv")
 
-        pd.DataFrame(scores_arr).to_csv(f"../results/experiments_{dataset}_{method}.csv")
+        pd.DataFrame(scores_arr).to_csv(f"results/experiments_{dataset}_{method}.csv")
     
     save_res('participatory', measure.lower(), dataset)
 

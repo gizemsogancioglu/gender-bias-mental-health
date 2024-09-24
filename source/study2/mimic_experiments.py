@@ -110,7 +110,7 @@ if __name__ == "__main__":
 	# embeddings = ['w2vec_news', 'biowordvec', 'bert', 'clinical_bert']
 	embeddings = ['biowordvec']
 	
-	data = pd.read_csv("../data/mimic_orig.csv", index_col=None)
+	data = pd.read_csv("data/mimic_orig.csv", index_col=None)
 	# create_MIMIC(data)
 	# for type in ['neutr']:
 	# extract_all_feat(type)

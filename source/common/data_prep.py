@@ -15,18 +15,18 @@ def create_MIMIC(data):
 		(tmp['TEXT']) = [gender_swapping(row['TEXT'], row['GENDER'], neutralize=val) for index, row in data.iterrows()]
 		if str_ == 'swapped':
 			(tmp['GENDER']) = [swap_gender(row['GENDER']) for index, row in data.iterrows()]
-		tmp.to_csv("../mimic_{str}.csv".format(str=str_), index=False)
+		tmp.to_csv("mimic_{str}.csv".format(str=str_), index=False)
 
 
 def create_fold_i(name, type, clf, fold_i):
 	neg_class = 'None-mental'
 	folds = collections.defaultdict(list)
-	orig_data = pd.read_csv("../features/mimic_{name}_orig.csv".format(name=name))
-	swapped_data = pd.read_csv("../features/mimic_{name}_swapped.csv".format(name=name))
-	neutr_data = pd.read_csv("../features/mimic_{name}_neutr.csv".format(name=name))
+	orig_data = pd.read_csv("features/mimic_{name}_orig.csv".format(name=name))
+	swapped_data = pd.read_csv("features/mimic_{name}_swapped.csv".format(name=name))
+	neutr_data = pd.read_csv("features/mimic_{name}_neutr.csv".format(name=name))
 	
 	if type != "augmented":
-		data = pd.read_csv("../features/mimic_{name}_{type}.csv".format(name=name, type=type))
+		data = pd.read_csv("features/mimic_{name}_{type}.csv".format(name=name, type=type))
 		subset = data[(data[clf] == 1) | (data[neg_class] == 1)].reset_index(drop=True)
 	
 	subset_orig = orig_data[(orig_data[clf] == 1) | (orig_data[neg_class] == 1)].reset_index(drop=True)
@@ -79,7 +79,7 @@ def convert_dataset(train_data, clf):
 def fold_cv(validation_split=0.1, config=10):
 	folds = collections.defaultdict(list)
 	
-	data = pd.read_csv("../data/mimic_orig.csv")
+	data = pd.read_csv("data/mimic_orig.csv")
 	
 	neg_class = 'None-mental'
 	n_splits = 10

@@ -27,7 +27,7 @@ def create_random(X_test, filename):
 	print(len(random_array))
 	df = pd.DataFrame({'Feature': [f'Feature_{i + 1}' for i in range(X_test.shape[1])],
 	                   'index': random_array, })
-	df.to_csv("../explanations/random_{file}_{emb}.csv".format(file=filename, emb=embedding))
+	df.to_csv("explanations/random_{file}_{emb}.csv".format(file=filename, emb=embedding))
 	return
 
 
@@ -44,7 +44,7 @@ def pcc_scores(X, filename):
 		{'Feature': [f'Feature_{i + 1}' for i in range(X[0].shape[1])], 'Pearson_Correlation': correlation_scores})
 	df['Absolute_Correlation'] = df['Pearson_Correlation'].abs()
 	df = df.sort_values(by='Absolute_Correlation', ascending=False)
-	pd.DataFrame(df).to_csv(f"../explanations/pcc_{filename}_{embedding}.csv")
+	pd.DataFrame(df).to_csv(f"explanations/pcc_{filename}_{embedding}.csv")
 
 
 def get_kernel_expl(filename, model, test_features):
@@ -60,7 +60,7 @@ def get_kernel_expl(filename, model, test_features):
 	                   'score': important_feat})
 	df['Absolute_Score'] = df['score'].abs()
 	df = df.sort_values(by='Absolute_Score', ascending=False)
-	df.to_csv("../explanations/shap_{file}_{emb}.csv".format(file=filename, emb=embedding))
+	df.to_csv("explanations/shap_{file}_{emb}.csv".format(file=filename, emb=embedding))
 
 
 # Function to compute permutation feature importance
@@ -79,7 +79,7 @@ def permutation_feature_importance(model, X_test, y_test, filename, metric=f1_sc
 	                   'std': std_f1})
 	df['Absolute_Score'] = df['score'].abs()
 	df = df.sort_values(by='Absolute_Score', ascending=False)
-	df.to_csv("../explanations/pfi_{file}_{emb}.csv".format(file=filename, emb=embedding))
+	df.to_csv("explanations/pfi_{file}_{emb}.csv".format(file=filename, emb=embedding))
 	return np.array(importance_f1)
 
 
@@ -105,17 +105,17 @@ def nullfy_given_indices(df, test_df, index_arr, strategy='mean'):
 def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method='mute'):
 	filename = str(fold_i)
 	
-	df_expl = pd.read_csv(f"../explanations/{expl}_{filename}_{embedding}.csv")
+	df_expl = pd.read_csv(f"explanations/{expl}_{filename}_{embedding}.csv")
 	df_expl['feat'] = X_test.columns
 	df_expl['index'] = df_expl['Unnamed: 0']
 	
 	if os.path.isfile(
-			f"../results/iterative_{method}_{expl}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i))):
+			f"results/iterative_{method}_{expl}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i))):
 		print("Iterative analysis already exists...")
 	return
 	
 	clf = 'DEPRESSION_majority'
-	df_expl = pd.read_csv(f"../explanations/{expl}_{filename}_{embedding}.csv")
+	df_expl = pd.read_csv(f"explanations/{expl}_{filename}_{embedding}.csv")
 	df_expl['feat'] = X_test.columns
 	
 	df_expl['index'] = df_expl['Unnamed: 0']
@@ -148,7 +148,7 @@ def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method=
 		print(f"SAVING ITERATIVE ANALYSIS FILE TO {del_}")
 		
 		df.to_csv(
-			f"../results/iterative_{method}_{expl}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i)))
+			f"results/iterative_{method}_{expl}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i)))
 	return
 
 
@@ -157,7 +157,7 @@ def model_selection(fold, embedding, method, expl):
 	df = collections.defaultdict(list)
 	for split in ['val', 'test']:
 		df[split] = pd.read_csv(
-			f"../results/iterative_{method}_{expl}_{embedding}_{split}_{fold}.csv")
+			f"results/iterative_{method}_{expl}_{embedding}_{split}_{fold}.csv")
 		df[split]['ID'] = df[split].index
 	func_methods = ['FUNC_' + str(lambda_val) for lambda_val in [0, 0.25, 0.5, 0.75, 1]]
 	dict_m = collections.defaultdict(list)
@@ -203,13 +203,13 @@ def model_selection(fold, embedding, method, expl):
 	
 	df_all = pd.DataFrame.from_dict(dict_m)
 	df_all.index = df['test'].columns
-	df_all.to_csv("../results/ours_mimic_{method}_{fold}.csv".format(method=method, fold=fold))
+	df_all.to_csv("results/ours_mimic_{method}_{fold}.csv".format(method=method, fold=fold))
 	return
 
 
 def get_explanations(X, y, fold_i, expl='shap'):
 	filename = str(fold_i)
-	if os.path.isfile(f"../explanations/{expl}_{filename}_{embedding}.csv"):
+	if os.path.isfile(f"explanations/{expl}_{filename}_{embedding}.csv"):
 		print("Explanations already exist...")
 		return
 	model = classifier(pd.DataFrame(X[0]).reset_index(drop=True),
