@@ -4,7 +4,7 @@ import numpy as np
 from aif360.datasets import BinaryLabelDataset
 from sklearn.model_selection import StratifiedKFold
 
-from text_processing import gender_swapping, swap_gender
+from source.study2.text_processing import gender_swapping, swap_gender
 
 clf = 'DEPRESSION_majority'
 attr = 'GENDER'
