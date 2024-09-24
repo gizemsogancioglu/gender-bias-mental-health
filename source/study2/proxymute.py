@@ -104,17 +104,21 @@ def nullfy_given_indices(df, test_df, index_arr, strategy='mean'):
 
 
 def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method='mute'):
-    
-    if os.path.isfile(f"../results/iterative_{method}_{del_}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i))):
-        print("Iterative analysis already exists...")
-        return
-    
-    clf = 'DEPRESSION_majority'
 	filename = str(fold_i)
+	
 	df_expl = pd.read_csv(f"../explanations/{expl}_{filename}_{embedding}.csv")
 	df_expl['feat'] = X_test.columns
-
-
+	df_expl['index'] = df_expl['Unnamed: 0']
+	
+	if os.path.isfile(
+			f"../results/iterative_{method}_{expl}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i))):
+		print("Iterative analysis already exists...")
+	return
+	
+	clf = 'DEPRESSION_majority'
+	df_expl = pd.read_csv(f"../explanations/{expl}_{filename}_{embedding}.csv")
+	df_expl['feat'] = X_test.columns
+	
 	df_expl['index'] = df_expl['Unnamed: 0']
 	
 	params = model.get_params()
@@ -122,7 +126,7 @@ def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method=
 	                           ('clf', SVC(random_state=0, probability=True, class_weight='balanced'))])
 	pipeline.set_params(**params)
 	
-	for del_, arr in [[expl, df_expl['index']]]:
+	for arr in [df_expl['index']]:
 		arr_sub = collections.defaultdict(list)
 		for i in range(0, len(X_test.columns) - 1, 1):
 			scores_arr = collections.defaultdict(list)
@@ -145,7 +149,7 @@ def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method=
 		print(f"SAVING ITERATIVE ANALYSIS FILE TO {del_}")
 		
 		df.to_csv(
-			f"../results/iterative_{method}_{del_}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i)))
+			f"../results/iterative_{method}_{expl}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i)))
 	return
 
 
@@ -164,8 +168,6 @@ def model_selection(fold, embedding, method, expl):
 			data[f'{measure}R'] = [measure_ratio(row[f'{measure}-F'], row[f'{measure}-M']) for index, row in
 			                       data.iterrows()]
 	
-	# df['val'] = df['test']
-	# + func_methods
 	df['val'] = df['val'][0:10]
 	for m in ['mismatch_ratio', 'TPRR', 'FPRR', 'F1R'] + func_methods:
 		metric = m
@@ -229,20 +231,20 @@ def get_explanations(X, y, fold_i, expl='shap'):
 
 
 def ours(X, y, fold_i, expl, method):
-    ####### Step1: get explanations using the given explanation method (expl)############################
-    get_explanations(X, y, fold_i, expl)
+	####### Step1: get explanations using the given explanation method (expl)############################
+	get_explanations(X, y, fold_i, expl)
 	
 	model = classifier(pd.DataFrame(X[0]).reset_index(drop=True),
 	                   pd.DataFrame(X[3]).reset_index(drop=True),
 	                   pd.DataFrame(y[0]).reset_index(drop=True),
 	                   pd.DataFrame(y[3]).reset_index(drop=True), weights=None, clf='DEPRESSION_majority')
 	
-    ####### Step 2: mute the features cumulatively and compute fairness and performance in each step. ###
+	####### Step 2: mute the features cumulatively and compute fairness and performance in each step. ###
 	for test_data, test_y, split in [pd.DataFrame(X[4]).reset_index(drop=True), y[4], 'val'], [
 		pd.DataFrame(X[1]).reset_index(drop=True), y[1], 'test']:
 		iterative_analysis(fold_i, model, X, test_data, test_y, split, expl, y, method)
 	
-    ###### Step 3: select the model that gives optimum scores ###########################################
+	###### Step 3: select the model that gives optimum scores ###########################################
 	model_selection(fold_i, embedding, method, expl)
 	
 	return
@@ -252,27 +254,22 @@ if __name__ == "__main__":
 	print("*********** Bias analysis EXPERIMENTS ********")
 	clf = 'DEPRESSION_majority'
 	attr = 'GENDER'
-	mental_arr = ['DEPRESSION_majority']
-	# embeddings = ['w2vec_news', 'biowordvec']
-	embeddings = ['biowordvec']
-	#data = pd.read_csv("../data/mimic_orig.csv", index_col=None)
-
+	embeddings = ['biowordvec']  # or w2vec_news
+	
 	###### WE ASSUME THAT FEATURES ARE ALREADY EXTRACTED #####################
 	embedding_length = set_length()
 	dataset = 'MIMIC'
 	label = clf
 	
 	measure = 'f1'
-	# config = 50
 	config = 5
 	folds_index = fold_cv(config=config)
-	explanation = 'shap'
-	method = 'mute'
+	explanation = 'shap'  # or pfi, pcc, random
+	method = 'mute'  # or roar
 	for embedding in embeddings:
 		folds = create_fold_i(embedding, 'orig', clf, folds_index)
 		for fold_i in range(0, config):
-	
-            X, y = [features[[str(a) for a in range(embedding_length[embedding])]].values for features in
-			        folds[str(fold_i)]], [y[[clf, 'GENDER', 'TEXT']] for y in folds[str(fold_i)]]	
+			X, y = [features[[str(a) for a in range(embedding_length[embedding])]].values for features in
+			        folds[str(fold_i)]], [y[[clf, 'GENDER', 'TEXT']] for y in folds[str(fold_i)]]
 			
-            ours(X, y, fold_i, expl=explanation)
+			ours(X, y, fold_i, expl=explanation)
