@@ -4,7 +4,7 @@ import os
 
 import numpy as np
 import pandas as pd
-#from interpret.blackbox import shap
+# from interpret.blackbox import shap
 import shap
 from scipy.stats import pearsonr
 from sklearn.pipeline import Pipeline
@@ -20,6 +20,7 @@ from sklearn.inspection import permutation_importance
 # Encode labels
 label_encoder = LabelEncoder()
 
+
 def create_random(X_test, filename):
 	# Create an array with numbers from 0 to 200
 	random_array = np.arange((X_test.shape[1]))
@@ -30,78 +31,88 @@ def create_random(X_test, filename):
 	df.to_csv("../explanations/random_{file}_{emb}.csv".format(file=filename, emb=embedding))
 	return
 
-def pcc_scores(X, filename):
-    index = 3
-    gender_binary = [0 if val == 'F' else 1 for val in y[index]['GENDER']]
 
-    correlation_scores = []
-    for i in range(X[index].shape[1]):
-        feature = X[index][:, i]
-        corr, _ = pearsonr(feature, gender_binary)
-        correlation_scores.append(corr)
-    df = pd.DataFrame({'Feature': [f'Feature_{i+1}' for i in range(X[0].shape[1])],'Pearson_Correlation': correlation_scores })
-    df['Absolute_Correlation'] = df['Pearson_Correlation'].abs()
-    df = df.sort_values(by='Absolute_Correlation', ascending=False)
-    pd.DataFrame(df).to_csv(f"../explanations/pcc_{filename}_{embedding}.csv")
+def pcc_scores(X, filename):
+	index = 3
+	gender_binary = [0 if val == 'F' else 1 for val in y[index]['GENDER']]
+	
+	correlation_scores = []
+	for i in range(X[index].shape[1]):
+		feature = X[index][:, i]
+		corr, _ = pearsonr(feature, gender_binary)
+		correlation_scores.append(corr)
+	df = pd.DataFrame(
+		{'Feature': [f'Feature_{i + 1}' for i in range(X[0].shape[1])], 'Pearson_Correlation': correlation_scores})
+	df['Absolute_Correlation'] = df['Pearson_Correlation'].abs()
+	df = df.sort_values(by='Absolute_Correlation', ascending=False)
+	pd.DataFrame(df).to_csv(f"../explanations/pcc_{filename}_{embedding}.csv")
+
 
 def get_kernel_expl(filename, model, test_features):
-    # Define a wrapper for the predict function to return numerical values
-    def predict_numerical(X):
-        predictions = model.predict(X)
-        return np.where(predictions == 'M', 1, 0)
+	# Define a wrapper for the predict function to return numerical values
+	def predict_numerical(X):
+		predictions = model.predict(X)
+		return np.where(predictions == 'M', 1, 0)
+	
+	expl = shap.KernelExplainer(model.predict, test_features.values)
+	shap_values = expl.shap_values(test_features.values)
+	important_feat = pd.DataFrame(abs(shap_values).mean(0)).reset_index(drop=True)
+	df = pd.DataFrame({'Feature': [f'Feature_{i + 1}' for i in range(test_features.shape[1])],
+	                   'score': important_feat})
+	df['Absolute_Score'] = df['score'].abs()
+	df = df.sort_values(by='Absolute_Score', ascending=False)
+	df.to_csv("../explanations/shap_{file}_{emb}.csv".format(file=filename, emb=embedding))
 
-    expl = shap.KernelExplainer(model.predict, test_features.values)
-    shap_values = expl.shap_values(test_features.values)
-    important_feat = pd.DataFrame(abs(shap_values).mean(0)).reset_index(drop=True)
-    df = pd.DataFrame({'Feature': [f'Feature_{i+1}' for i in range(test_features.shape[1])],
-                                                      'score': important_feat})
-    df['Absolute_Score'] = df['score'].abs()
-    df = df.sort_values(by='Absolute_Score', ascending=False)
-    df.to_csv("../explanations/shap_{file}_{emb}.csv".format(file=filename, emb=embedding))
 
 # Function to compute permutation feature importance
 def permutation_feature_importance(model, X_test, y_test, filename, metric=f1_score, average='macro'):
-    # Custom scoring: using F1 score
-    f1_scorer = make_scorer(f1_score, average=average)
-    result_f1 = permutation_importance(model, X_test, label_encoder.transform(y_test), n_repeats=20, random_state=42, n_jobs=-1, scoring=f1_scorer)
+	# Custom scoring: using F1 score
+	f1_scorer = make_scorer(f1_score, average=average)
+	result_f1 = permutation_importance(model, X_test, label_encoder.transform(y_test), n_repeats=20, random_state=42,
+	                                   n_jobs=-1, scoring=f1_scorer)
+	
+	# Get feature importance with F1 scoring
+	importance_f1 = result_f1.importances_mean
+	std_f1 = result_f1.importances_std
+	
+	df = pd.DataFrame({'Feature': [f'Feature_{i + 1}' for i in range(X_test.shape[1])],
+	                   'score': importance_f1,
+	                   'std': std_f1})
+	df['Absolute_Score'] = df['score'].abs()
+	df = df.sort_values(by='Absolute_Score', ascending=False)
+	df.to_csv("../explanations/pfi_{file}_{emb}.csv".format(file=filename, emb=embedding))
+	return np.array(importance_f1)
 
-    # Get feature importance with F1 scoring
-    importance_f1 = result_f1.importances_mean
-    std_f1 = result_f1.importances_std
-
-    df = pd.DataFrame({'Feature': [f'Feature_{i+1}' for i in range(X_test.shape[1])],
-                                                                  'score': importance_f1,
-                                                                  'std': std_f1 })
-    df['Absolute_Score'] = df['score'].abs()
-    df = df.sort_values(by='Absolute_Score', ascending=False)
-    df.to_csv("../explanations/pfi_{file}_{emb}.csv".format(file=filename, emb=embedding))
-    return np.array(importance_f1)
 
 def remove_given_indices(df, index_arr):
-    df_new = df.T.reset_index(drop=True)
-    df_new = (df_new.loc[~df_new.index.isin(index_arr), :])
-    return (df_new.T)
+	df_new = df.T.reset_index(drop=True)
+	df_new = (df_new.loc[~df_new.index.isin(index_arr), :])
+	return (df_new.T)
+
 
 def nullfy_given_indices(df, test_df, index_arr, strategy='mean'):
-    df_new = copy.deepcopy(df)
-    test_df_new = copy.deepcopy(test_df)
-    mean_df = df_new.mean().T.to_frame()
-    mean_df['feat_name'] = mean_df.index
-    mean_df = mean_df.reset_index(drop=True)
-    for data in [df_new, test_df_new]:
-        for index in index_arr:
-            feature = mean_df.loc[index]['feat_name']
-            data[feature] = mean_df.loc[index][0]
-    return df_new, test_df_new
+	df_new = copy.deepcopy(df)
+	test_df_new = copy.deepcopy(test_df)
+	mean_df = df_new.mean().T.to_frame()
+	mean_df['feat_name'] = mean_df.index
+	mean_df = mean_df.reset_index(drop=True)
+	for data in [df_new, test_df_new]:
+		for index in index_arr:
+			feature = mean_df.loc[index]['feat_name']
+			data[feature] = mean_df.loc[index][0]
+	return df_new, test_df_new
+
 
 def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method='mute'):
 	clf = 'DEPRESSION_majority'
 	filename = str(fold_i)
 	df_expl = pd.read_csv(f"../explanations/{expl}_{filename}_{embedding}.csv")
 	df_expl['feat'] = X_test.columns
-    df_expl['index'] = df_expl['Unnamed: 0']
 
-    params = model.get_params()
+
+	df_expl['index'] = df_expl['Unnamed: 0']
+	
+	params = model.get_params()
 	pipeline = Pipeline(steps=[('standardscaler', StandardScaler()),
 	                           ('clf', SVC(random_state=0, probability=True, class_weight='balanced'))])
 	pipeline.set_params(**params)
@@ -116,7 +127,7 @@ def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method=
 			elif method == 'roar':
 				train_data = remove_given_indices(pd.DataFrame(X[0]).reset_index(drop=True), del_val)
 				test_data = remove_given_indices(X_test, del_val)
-			
+				
 				pipeline.set_params(**params)
 				model = pipeline.fit(train_data, pd.DataFrame(y[0]).reset_index(drop=True)[clf])
 			
@@ -131,6 +142,7 @@ def iterative_analysis(fold_i, model, X, X_test, y_test, split, expl, y, method=
 		df.to_csv(
 			f"../results/iterative_{method}_{del_}_{embedding}_{split}_{fold_i}.csv".format(fold_i=str(fold_i)))
 	return
+
 
 def ours_(fold, embedding, method, expl):
 	# choose the model that gives the lowest score for lambda * mae on validation set.
@@ -201,7 +213,8 @@ def get_explanations(X, y, fold_i, expl='shap'):
 	
 	if expl == 'shap':
 		get_kernel_expl(str(fold_i), model,
-	                pd.concat([pd.DataFrame(X[0]).reset_index(drop=True), pd.DataFrame(X[3]).reset_index(drop=True)]))
+		                pd.concat(
+			                [pd.DataFrame(X[0]).reset_index(drop=True), pd.DataFrame(X[3]).reset_index(drop=True)]))
 	elif expl == 'pfi':
 		permutation_feature_importance(model, X[3], y[3]['GENDER'], filename)
 	elif expl == 'pcc':
@@ -240,8 +253,8 @@ def proxyMute(X, y, fold_i, expl):
 	for test_data, test_y, split in [pd.DataFrame(X[4]).reset_index(drop=True), y[4], 'val'], [
 		pd.DataFrame(X[1]).reset_index(drop=True), y[1], 'test']:
 		iterative_analysis(fold_i, model, X, test_data, test_y, split, expl, y, 'mute')
-
-	#save_res('proxymute', 'f1', 'mimic')
+	
+	# save_res('proxymute', 'f1', 'mimic')
 	
 	ours_(fold_i, embedding, method, expl)
 	
