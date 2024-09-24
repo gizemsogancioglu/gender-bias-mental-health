@@ -11,7 +11,8 @@ Available in this repository:
   
         .
         ├── study2                          # including source files (feature extractor, training, and bias mitigation scripts)                
-        │   ├── mimic_experiments.py        # main script to run experiments with different bias mitigation methods (gender-specific models, data augmentation/neutralization, pre/post-processing)
+        │   ├── mimic_experiments.py        # main script to run experiments with different bias mitigation methods.
+        │   ├── bias_mitigation.py          # implementation of bias mitigation methods (gender-specific models, data augmentation/neutralization, pre/post-processing). 
         │   ├── participatory.py            # gain-based model selection experiments.
         │   ├── *.py                        # other source files include helper functions for data preparation, preprocessing, embedding extraction, and bias mitigation. 
         └── features                        # extracted w2vec/biowordvec/bert/clinical_bert features (mimic_{embedding}_[orig/neutr/swapped].csv). 

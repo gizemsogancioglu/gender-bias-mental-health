@@ -25,7 +25,7 @@ gender_sentences = ['he is a father of a girl and boy and he loves his children'
                     'he is a good son']
 
 def read_disease_file():
-    f = open('../../data/depression_synonyms.json', encoding='utf-8')
+    f = open('data/depression_synonyms.json', encoding='utf-8')
     synonym_dict = json.load(f)
     return synonym_dict
 
@@ -58,7 +58,7 @@ def compute_direct_bias(model, gender_vec, model_name):
     df['score'] = score_list
     df['word'] = word_list
 
-    df.to_csv('../output/' + model_name + '_word_bias_scores.csv')
+    df.to_csv('output/' + model_name + '_word_bias_scores.csv')
 
     mean_scores_dict = defaultdict(list)
     for key in scores.keys():
@@ -88,14 +88,14 @@ def identify_gender_space(model, model_name):
     df['components'] = [1, 2, 3, 4, 5]
     sns.barplot(data=df, x="components", y="explained variance")
     plt.ylim(0, 0.7)
-    plt.savefig("../output/{model_name}_gender_space.png".format(model_name=model_name), bbox_inches='tight', pad_inches=0)
+    plt.savefig("output/{model_name}_gender_space.png".format(model_name=model_name), bbox_inches='tight', pad_inches=0)
     return pca.components_[0]
 
 def cosine_similarity(vec1, vec2):
     return (1 - spatial.distance.cosine(vec1, vec2))
 
 def plot_direct_bias(plot_name):
-    df = pd.read_csv("../output/" + plot_name + "_direct_bias_cat.csv", index_col=None)
+    df = pd.read_csv("output/" + plot_name + "_direct_bias_cat.csv", index_col=None)
     df.index = ['mean', 'max', 'median']
     df_T = df.T.reset_index()
     df_T = df_T.set_index('index').stack().reset_index()
@@ -108,7 +108,7 @@ def plot_direct_bias(plot_name):
                    ha='center', va='center',
                    xytext=(0, 9),
                    textcoords='offset points')
-    g.figure.savefig("../output/" + plot_name + ".png")
+    g.figure.savefig("output/" + plot_name + ".png")
 
 
 def project_to_sensitive_attr(gender_vec, disease_vector):
@@ -127,5 +127,5 @@ if __name__ == "__main__":
         print(cosine_similarity(get_word_vector(model, "anxiety is a synonym of depression", 6), gender_vec))
 
         scores = compute_direct_bias(model, gender_vec, model_name)
-        pd.DataFrame.from_dict(scores).to_csv("../output/" + model_name + "_direct_bias_cat.csv")
+        pd.DataFrame.from_dict(scores).to_csv("output/" + model_name + "_direct_bias_cat.csv")
         plot_direct_bias(model_name)

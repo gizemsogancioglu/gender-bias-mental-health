@@ -52,11 +52,11 @@ def experiment(method_name, folds, config, embedding, clf):
 		elif method_name in ['postprocessing', 'inprocessing']:
 			if method == 'postprocessing':
 				val_data = pd.read_csv(
-					"../preds/val_predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
+					"preds/val_predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
 					                                                                                    fold_i=fold_i,
 					                                                                                    emb=embedding))
 				test_data = pd.read_csv(
-					"../preds/predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
+					"preds/predictions_MIMIC_orig_fold{fold_i}_{emb}.csv".format(measure=measure,
 					                                                                                fold_i=fold_i,
 					                                                                                emb=embedding))
 			else:
@@ -71,9 +71,9 @@ def experiment(method_name, folds, config, embedding, clf):
 			data = pd.DataFrame()
 			val_data = pd.DataFrame()
 		
-		data.to_csv(f"../preds/predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
+		data.to_csv(f"preds/predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
 		
-		val_data.to_csv(f"../preds/val_predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
+		val_data.to_csv(f"preds/val_predictions_MIMIC_{method_name}_fold{fold_i}_{embedding}.csv")
 
 
     #return
@@ -83,11 +83,11 @@ def evalute_predictions(method):
 	val_scores_arr = collections.defaultdict(list)
 	for fold_i in range(config):
 		test_preds = pd.read_csv(
-					"../preds/predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method,
+					"preds/predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method,
 					                                                                   fold_i=fold_i,
 					                                                                   emb=embedding, measure=measure))
 		val_preds = pd.read_csv(
-					"../preds/val_predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method,
+					"preds/val_predictions_{dataset}_{i}_fold{fold_i}_{emb}.csv".format(dataset=dataset, i=method,
 					                                                                       fold_i=fold_i,
 					                                                                       emb=embedding,
 					                                                                       measure=measure))
@@ -97,9 +97,9 @@ def evalute_predictions(method):
 				                      dataset)
 		
 	pd.DataFrame(val_scores_arr).to_csv(
-			"../results/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+			"results/val_experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
 	pd.DataFrame(scores_arr).to_csv(
-			"../results/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
+			"results/experiments_{dataset}_{i}.csv".format(dataset=dataset, measure=measure, i=method))
 	
 
 if __name__ == "__main__":

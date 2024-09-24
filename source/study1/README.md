@@ -13,9 +13,8 @@ Available in this repository:
 
         .
         ├── source                          # including source files (feature extractor, training, and predictor scripts)                
-        │   ├── embeddings.py               # feature extraction methods for word embeddings. 
+        │   ├── embeddings_bias.py          # bias measures for embeddings bias. 
         │   ├── phenotype_experiments.py    # main script for phenotype classification experiments with original/swapped/neutralized/augmented datasets.
-        │   ├── text_processing.py          # includes gender pronun removal and text cleaning methods.
         ├── data                         
         │   ├── depression_synonyms.json    # gathered from [Identifying Symptom Information in Clinical Notes Using Natural Language Processing](https://pubmed.ncbi.nlm.nih.gov/33196504/)
         └── features                        # extracted w2vec features. 
