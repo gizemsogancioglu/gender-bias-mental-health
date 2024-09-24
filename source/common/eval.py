@@ -108,9 +108,9 @@ def measure_ratio(val1, val2):
 from scipy.stats import ttest_rel
 def save_res(method, measure_file, dataset):
     for split in ['val_', '']:
-        data = pd.read_csv(f"../results/{split}experiments_{dataset}_{method}.csv")
+        data = pd.read_csv(f"results/{split}experiments_{dataset}_{method}.csv")
         data = data.groupby(['embedding', 'fold_num']).tail(1)
-        orig_data = pd.read_csv(f"../results/{split}experiments_{dataset}_orig.csv")
+        orig_data = pd.read_csv(f"results/{split}experiments_{dataset}_orig.csv")
         columns = ['TPR-F', 'TPR-M',
                        'AUC-F', 'AUC-M',
                        'AUC-fm', 'AUC-mf',
@@ -171,7 +171,7 @@ def save_res(method, measure_file, dataset):
         
         final_columns = [ 'mismatch_ratio','avg_TPRR', 'avg_FPRR', 'avg_F1R','avg_F1-posR', 'avg_F1-negR', 'TPRR', 'FPRR', 'F1R','TPR-F', 'TPR-M', 'FPR-F', 'FPR-M', 'F1-F', 'F1-M', 'F1-posR', 'F1-negR', 'AUCR', 'AUCminmax', 'F1', 'AUC']
     
-        subset[final_columns].to_csv("../results/{split}experiments_{dataset}_{i}_summary.csv".format(dataset=dataset, measure=measure_file, i=method, split=split))
+        subset[final_columns].to_csv("results/{split}experiments_{dataset}_{i}_summary.csv".format(dataset=dataset, measure=measure_file, i=method, split=split))
 
     return
 
